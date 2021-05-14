@@ -97,13 +97,13 @@ File.readlines('top-1m.csv').each do |line|
   res = fetch("https://#{domain}/.well-known/security.txt")
   res = fetch("https://#{domain}/security.txt") unless security_txt?(res)
   if security_txt?(res)
-    results.push(parse(res.body))
+    results.push(parse(res.body).merge({"domain" => domain}))
   else
-    results.push({"security.txt": false})
+    results.push({"security.txt": false, "domain" => domain})
   end
 
   # Test stop at 1000
   break if line.split(',')[0] == '1000'
 end
 
-File.write('results.json',JSON.fast_generate(results))
+File.write("results_#{Time.now.strftime("%Y-%m-%d")}.json",JSON.fast_generate(results))
