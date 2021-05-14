@@ -86,24 +86,26 @@ def parse(text)
 
 end
 
-results = []
+if __FILE__==$0
+  results = []
 
-File.readlines('top-1m.csv').each do |line|
-  puts line
+  File.readlines('top-1m.csv').each do |line|
+    puts line
 
-  #next if line.split(',')[0].to_i < 163
+    #next if line.split(',')[0].to_i < 163
 
-  domain = line.split(',')[1].chomp
-  res = fetch("https://#{domain}/.well-known/security.txt")
-  res = fetch("https://#{domain}/security.txt") unless security_txt?(res)
-  if security_txt?(res)
-    results.push(parse(res.body).merge({"domain" => domain}))
-  else
-    results.push({"security.txt": false, "domain" => domain})
+    domain = line.split(',')[1].chomp
+    res = fetch("https://#{domain}/.well-known/security.txt")
+    res = fetch("https://#{domain}/security.txt") unless security_txt?(res)
+    if security_txt?(res)
+      results.push(parse(res.body).merge({"domain" => domain}))
+    else
+      results.push({"security.txt": false, "domain" => domain})
+    end
+
+    # Test stop at 1000
+    break if line.split(',')[0] == '1000'
   end
 
-  # Test stop at 1000
-  break if line.split(',')[0] == '1000'
+  File.write("results_#{Time.now.strftime("%Y-%m-%d")}.json",JSON.fast_generate(results))
 end
-
-File.write("results_#{Time.now.strftime("%Y-%m-%d")}.json",JSON.fast_generate(results))
